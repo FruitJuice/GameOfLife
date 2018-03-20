@@ -59,62 +59,51 @@ public class Game extends JFrame implements Runnable, MouseListener {
             }
 
             if (isGamePlaying) {
+                //loop through each cell
                 for (int x = 0; x < 40; x++) {
                     for (int y = 0; y < 40; y++) {
+                        //count how many alive neighbours does each cell have
                         int noAlive = 0;
-
+                        //loop through each cells neighbours to check their state
                         for (int xx=-1;xx<=1;xx++) {
                             for (int yy = -1; yy <= 1; yy++) {
-                                if (xx != 0 || yy != 0) {
-                                    if ((x + xx > 0) && (y + yy > 0) && (x + xx < 39) && (y + yy < 39)) {
-                                        if (gameState[x + xx][y + yy][front]) noAlive++;
+                                //make sure we're not checking the cell itself
+                                if (!(xx==0 && yy==0)) {
+                                    //if off-screen we loop it back
+                                    int tempX = (x+xx);
+                                    int tempY = (y+yy);
+                                    if(tempX < 0) tempX = 39;
+                                    if(tempX > 39) tempX = 0;
+
+                                    if(tempY < 0) tempY = 39;
+                                    if(tempY > 39) tempY = 0;
+
+                                    //if the nighbour is alive we add to the alive count
+                                    if (gameState[tempX][tempY][front]) noAlive++;
                                     }
                                 }
                             }
-                        }
-//                        if (x > 0 && y > 0) {
-//                            if (gameState[x - 1][y - 1][front]) noAlive++;
-//                        }
-//                        if (x > 0) {
-//                            if (gameState[x - 1][y][front]) noAlive++;
-//                        }
-//                        if (x > 0 && y < 39) {
-//                            if (gameState[x - 1][y + 1][front]) noAlive++;
-//                        }
-//
-//
-//                        if (y > 0) {
-//                            if (gameState[x][y - 1][front]) noAlive++;
-//                        }
-//                        if (y < 39) {
-//                            if (gameState[x][y + 1][front]) noAlive++;
-//                        }
-//
-//
-//                        if (x < 39 && y > 0) {
-//                            if (gameState[x + 1][y - 1][front]) noAlive++;
-//                        }
-//                        if (x < 39) {
-//                            if (gameState[x + 1][y][front]) noAlive++;
-//                        }
-//                        if (x < 39 && y < 39) {
-//                            if (gameState[x + 1][y + 1][front]) noAlive++;
-//                        }
-
+                        //checking for the rules of the game
                         if (noAlive < 2) gameState[x][y][back] = false;
-                        if (noAlive == 2 || noAlive == 3) gameState[x][y][back] = true;
+                        if (noAlive == 3) gameState[x][y][back] = true;
+                        if (gameState[x][y][front]){
+                            if(noAlive == 2){
+                                gameState[x][y][back]=true;
+                            }
+                        }
                         if (noAlive > 3) gameState[x][y][back] = false;
-                        if (!gameState[x][y][front] && noAlive == 3) gameState[x][y][back] = true;
                     }
                 }
 
-                if (front == 0) front = 1;
-                if (front == 1) front = 0;
-
-                if (back == 0) back = 1;
-                if (back == 1) back = 0;
+                //copying the changes we made in the back to the front, which will be rendered
+                for(int x  = 0; x<40;x++){
+                    for(int y = 0; y <40; y++){
+                        gameState[x][y][front] = gameState[x][y][back];
+                    }
+                }
             }
 
+            //repainting the game
             this.repaint();
         }
     }
@@ -123,6 +112,7 @@ public class Game extends JFrame implements Runnable, MouseListener {
         int x = e.getX() / 20;
         int y = e.getY() / 20;
 
+        //toggle between alive/dead when mouse pressed
         gameState[x][y][front] = !gameState[x][y][front];
         if ((e.getX() > 50 && e.getX() < 120) && (e.getY() > 50 && e.getY() < 80)) {
             isGamePlaying = true;
@@ -135,6 +125,7 @@ public class Game extends JFrame implements Runnable, MouseListener {
     }
 
     public void randomise(){
+        //randomise if each cell is alive or dead
         for (int x = 0; x < 40; x++) {
             for (int y = 0; y < 40; y++) {
                 if(Math.random() < 0.45) {
@@ -156,6 +147,7 @@ public class Game extends JFrame implements Runnable, MouseListener {
     public void mouseClicked(MouseEvent e) {
     }
 
+    //method for writing the buttons to START/RANDOM game
     public void writeString(Graphics g, int x, int y, int fontSize, String message) {
         Font f = new Font("Arabic", Font.BOLD, fontSize);
         g.setFont(f);
@@ -180,28 +172,17 @@ public class Game extends JFrame implements Runnable, MouseListener {
             for (int x = 0; x < 40; x++) {
                 for (int y = 0; y < 40; y++) {
                     if (gameState[x][y][front]) {
+                        g.setColor(Color.white);
                         g.fillRect(x * 20, y * 20, 20, 20);
                     }
                 }
 
             }
 
-//        if(isGamePlaying && !isRandom ){
-//            g.setColor(Color.RED);
-//            g.fillRect(0, 0, WindowSize.width, WindowSize.height);
-//        }
-//
-//        if(isGamePlaying && isRandom ){
-//            g.setColor(Color.BLUE);
-//            g.fillRect(0, 0, WindowSize.width, WindowSize.height);
-//        }
-
             g.setColor(Color.black);
             writeString(g, 80, 70, 20, "Start");
             writeString(g, 200, 70, 20, "Random");
 
-
-            //g.dispose();
             strategy.show();
         }
 
