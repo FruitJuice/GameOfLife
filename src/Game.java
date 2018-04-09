@@ -2,10 +2,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 
 
-public class Game extends JFrame implements Runnable, MouseListener {
+public class Game extends JFrame implements Runnable, MouseListener, MouseMotionListener {
 
     private static final Dimension WindowSize = new Dimension(800, 800);
     private BufferStrategy strategy;
@@ -35,6 +36,7 @@ public class Game extends JFrame implements Runnable, MouseListener {
 
 
         addMouseListener(this);
+        addMouseMotionListener(this);
 
         for (int z = 0; z < 2; z++) {
             for (x = 0; x < 40; x++) {
@@ -54,7 +56,7 @@ public class Game extends JFrame implements Runnable, MouseListener {
     public void run() {
         while (1 == 1) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
             }
 
@@ -109,19 +111,23 @@ public class Game extends JFrame implements Runnable, MouseListener {
     }
 
     public void mousePressed(MouseEvent e) {
-        int x = e.getX() / 20;
-        int y = e.getY() / 20;
 
-        //toggle between alive/dead when mouse pressed
-        gameState[x][y][front] = !gameState[x][y][front];
-        if ((e.getX() > 50 && e.getX() < 120) && (e.getY() > 50 && e.getY() < 80)) {
-            isGamePlaying = true;
-        }
+        if(!isGamePlaying) {
 
-        if ((e.getX() > 150 && e.getX() < 250) && (e.getY() > 50 && e.getY() < 80)) {
-           randomise();
+            int x = e.getX() / 20;
+            int y = e.getY() / 20;
+
+            //toggle between alive/dead when mouse pressed
+            gameState[x][y][front] = !gameState[x][y][front];
+            if ((e.getX() > 50 && e.getX() < 120) && (e.getY() > 50 && e.getY() < 80)) {
+                isGamePlaying = true;
+            }
+
+            if ((e.getX() > 150 && e.getX() < 250) && (e.getY() > 50 && e.getY() < 80)) {
+                randomise();
+            }
         }
-        this.repaint();
+        //this.repaint();
     }
 
     public void randomise(){
@@ -147,6 +153,22 @@ public class Game extends JFrame implements Runnable, MouseListener {
     public void mouseClicked(MouseEvent e) {
     }
 
+
+    public void mouseMoved(MouseEvent e){
+
+    }
+
+    public void mouseDragged(MouseEvent e){
+        if(!isGamePlaying) {
+
+            int x = e.getX() / 20;
+            int y = e.getY() / 20;
+
+            //toggle between alive/dead when mouse pressed
+            gameState[x][y][front] = true;
+        }
+    }
+
     //method for writing the buttons to START/RANDOM game
     public void writeString(Graphics g, int x, int y, int fontSize, String message) {
         Font f = new Font("Arabic", Font.BOLD, fontSize);
@@ -164,9 +186,18 @@ public class Game extends JFrame implements Runnable, MouseListener {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, WindowSize.width, WindowSize.height);
 
-            g.setColor(Color.GREEN);
-            g.fillRect(50, 50, 70, 30);
-            g.fillRect(150, 50, 100, 30);
+            if(!isGamePlaying) {
+                g.setColor(Color.GREEN);
+                g.fillRect(50, 50, 70, 30);
+                g.fillRect(150, 50, 100, 30);
+                g.fillRect(290, 50, 60, 30);
+                g.fillRect(390, 50, 60, 30);
+                g.setColor(Color.black);
+                writeString(g, 80, 70, 20, "Start");
+                writeString(g, 200, 70, 20, "Random");
+                writeString(g, 320, 70, 20, "Save");
+                writeString(g, 420, 70, 20, "Load");
+            }
 
             g.setColor(Color.white);
             for (int x = 0; x < 40; x++) {
@@ -178,10 +209,6 @@ public class Game extends JFrame implements Runnable, MouseListener {
                 }
 
             }
-
-            g.setColor(Color.black);
-            writeString(g, 80, 70, 20, "Start");
-            writeString(g, 200, 70, 20, "Random");
 
             strategy.show();
         }
