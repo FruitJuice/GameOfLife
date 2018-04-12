@@ -4,6 +4,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
+import java.io.*;
 
 
 public class Game extends JFrame implements Runnable, MouseListener, MouseMotionListener {
@@ -16,6 +17,7 @@ public class Game extends JFrame implements Runnable, MouseListener, MouseMotion
     private boolean isInitialised = false;
     private int front;
     private int back;
+    private String filename = "C:\\Users\\sndri\\desktop\\lifegame.txt";
 
     public Game() {
         //Make a display window centered on the screen
@@ -126,8 +128,15 @@ public class Game extends JFrame implements Runnable, MouseListener, MouseMotion
             if ((e.getX() > 150 && e.getX() < 250) && (e.getY() > 50 && e.getY() < 80)) {
                 randomise();
             }
+
+            if ((e.getX() > 290 && e.getX() < 350) && (e.getY() > 50 && e.getY() < 80)) {
+                save();
+            }
+
+            if ((e.getX() > 390 && e.getX() < 450) && (e.getY() > 50 && e.getY() < 80)) {
+                load();
+            }
         }
-        //this.repaint();
     }
 
     public void randomise(){
@@ -178,6 +187,56 @@ public class Game extends JFrame implements Runnable, MouseListener, MouseMotion
         g.drawString(message, x - width / 2, y);
     }
 
+    public void load(){
+        String line = null;
+        int lineNum = 0;
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            do{
+                try {
+                    line = reader.readLine();
+                    if(Integer.parseInt(line) == 1){
+                        int xpos = lineNum/40;
+                        int ypos = (xpos*40)-lineNum;
+                        if(ypos <= 0){
+                            ypos = ypos * -1;
+                        }
+
+                        gameState[xpos][ypos][front] = true;
+                    }
+                }catch(IOException e){}
+
+                lineNum++;
+            }
+            while(line!=null);
+
+            reader.close();
+        }
+        catch (IOException e){}
+
+        this.repaint();
+    }
+
+    public void save() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+            String data = "";
+
+            for(int x=0;x<40;x++) {
+                for(int y=0;y<40;y++) {
+                    if(gameState[x][y][front])
+                    {
+                        data+="1\r";
+                    }
+                    else
+                        data+="0\r";
+                }
+            }
+            writer.write(data);
+            writer.close();
+        }
+        catch (IOException e) { }
+    }
 
     public void paint(Graphics g) {
         if(isInitialised) {
@@ -214,6 +273,8 @@ public class Game extends JFrame implements Runnable, MouseListener, MouseMotion
         }
 
     }
+
+
 
 
     public static void main(String[] args) {
